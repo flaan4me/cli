@@ -116,6 +116,50 @@ func mainRun() exitCode {
 
 	rootCmd.SetArgs(expandedArgs)
 
+	// Add new command `repo` to fetch repository details using the GitHub API
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "repo",
+		Short: "Fetch repository details using the GitHub API",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("repository name is required")
+			}
+			repoName := args[0]
+			client, err := cmdFactory.HttpClient()
+			if err != nil {
+				return err
+			}
+			repo, err := api.FetchRepository(client, repoName)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Repository: %s\nDescription: %s\n", repo.Name, repo.Description)
+			return nil
+		},
+	})
+
+	// Add new command `user` to fetch user details using the GitHub API
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "user",
+		Short: "Fetch user details using the GitHub API",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return errors.New("username is required")
+			}
+			username := args[0]
+			client, err := cmdFactory.HttpClient()
+			if err != nil {
+				return err
+			}
+			user, err := api.GetUser(client, username)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("User: %s\nName: %s\n", user.Login, user.Name)
+			return nil
+		},
+	})
+
 	if cmd, err := rootCmd.ExecuteContextC(ctx); err != nil {
 		var pagerPipeError *iostreams.ErrClosedPagerPipe
 		var noResultsError cmdutil.NoResultsError

@@ -271,3 +271,278 @@ func clientOptions(hostname string, transport http.RoundTripper) ghAPI.ClientOpt
 	}
 	return opts
 }
+
+// GetRepository fetches repository details using the GitHub API
+func (c Client) GetRepository(owner, repo string) (*Repository, error) {
+	var result struct {
+		Repository *Repository
+	}
+	query := `
+	query($owner: String!, $repo: String!) {
+		repository(owner: $owner, name: $repo) {
+			id
+			name
+			owner {
+				login
+			}
+			description
+			url
+			createdAt
+			updatedAt
+			pushedAt
+			isPrivate
+			isFork
+			isArchived
+			isTemplate
+			hasIssuesEnabled
+			hasWikiEnabled
+			hasProjectsEnabled
+			hasDiscussionsEnabled
+			mergeCommitAllowed
+			squashMergeAllowed
+			rebaseMergeAllowed
+			autoMergeAllowed
+			forkCount
+			stargazerCount
+			watchers {
+				totalCount
+			}
+			issues {
+				totalCount
+			}
+			pullRequests {
+				totalCount
+			}
+			primaryLanguage {
+				name
+			}
+			licenseInfo {
+				key
+				name
+			}
+			defaultBranchRef {
+				name
+			}
+			viewerPermission
+			viewerCanAdminister
+			viewerCanPush
+			viewerCanTriage
+			viewerCanCreateProjects
+			viewerCanCreateDiscussions
+			viewerCanCreateIssues
+			viewerCanCreatePullRequests
+			viewerCanCreateRepositories
+			viewerCanCreateTeams
+			viewerCanCreateGists
+			viewerCanCreatePackages
+			viewerCanCreatePages
+			viewerCanCreateReleases
+			viewerCanCreateDeployments
+			viewerCanCreateEnvironments
+			viewerCanCreateSecrets
+			viewerCanCreateVariables
+			viewerCanCreateWebhooks
+			viewerCanCreateWorkflows
+			viewerCanCreateCodespaces
+			viewerCanCreateCodespaceSecrets
+			viewerCanCreateCodespaceVariables
+			viewerCanCreateCodespaceWebhooks
+			viewerCanCreateCodespaceWorkflows
+			viewerCanCreateCodespaceDeployments
+			viewerCanCreateCodespaceEnvironments
+			viewerCanCreateCodespacePackages
+			viewerCanCreateCodespacePages
+			viewerCanCreateCodespaceReleases
+			viewerCanCreateCodespaceTeams
+			viewerCanCreateCodespaceRepositories
+			viewerCanCreateCodespacePullRequests
+			viewerCanCreateCodespaceIssues
+			viewerCanCreateCodespaceDiscussions
+			viewerCanCreateCodespaceProjects
+			viewerCanCreateCodespaceWiki
+			viewerCanCreateCodespaceTemplates
+			viewerCanCreateCodespaceForks
+			viewerCanCreateCodespaceStargazers
+			viewerCanCreateCodespaceWatchers
+			viewerCanCreateCodespaceIssuesEnabled
+			viewerCanCreateCodespaceWikiEnabled
+			viewerCanCreateCodespaceProjectsEnabled
+			viewerCanCreateCodespaceDiscussionsEnabled
+			viewerCanCreateCodespaceMergeCommitAllowed
+			viewerCanCreateCodespaceSquashMergeAllowed
+			viewerCanCreateCodespaceRebaseMergeAllowed
+			viewerCanCreateCodespaceAutoMergeAllowed
+			viewerCanCreateCodespaceForkCount
+			viewerCanCreateCodespaceStargazerCount
+			viewerCanCreateCodespaceWatcherCount
+			viewerCanCreateCodespaceIssueCount
+			viewerCanCreateCodespacePullRequestCount
+			viewerCanCreateCodespacePrimaryLanguage
+			viewerCanCreateCodespaceLicenseInfo
+			viewerCanCreateCodespaceDefaultBranchRef
+			viewerCanCreateCodespaceViewerPermission
+			viewerCanCreateCodespaceViewerCanAdminister
+			viewerCanCreateCodespaceViewerCanPush
+			viewerCanCreateCodespaceViewerCanTriage
+			viewerCanCreateCodespaceViewerCanCreateProjects
+			viewerCanCreateCodespaceViewerCanCreateDiscussions
+			viewerCanCreateCodespaceViewerCanCreateIssues
+			viewerCanCreateCodespaceViewerCanCreatePullRequests
+			viewerCanCreateCodespaceViewerCanCreateRepositories
+			viewerCanCreateCodespaceViewerCanCreateTeams
+			viewerCanCreateCodespaceViewerCanCreateGists
+			viewerCanCreateCodespaceViewerCanCreatePackages
+			viewerCanCreateCodespaceViewerCanCreatePages
+			viewerCanCreateCodespaceViewerCanCreateReleases
+			viewerCanCreateCodespaceViewerCanCreateDeployments
+			viewerCanCreateCodespaceViewerCanCreateEnvironments
+			viewerCanCreateCodespaceViewerCanCreateSecrets
+			viewerCanCreateCodespaceViewerCanCreateVariables
+			viewerCanCreateCodespaceViewerCanCreateWebhooks
+			viewerCanCreateCodespaceViewerCanCreateWorkflows
+			viewerCanCreateCodespaceViewerCanCreateCodespaces
+			viewerCanCreateCodespaceViewerCanCreateCodespaceSecrets
+			viewerCanCreateCodespaceViewerCanCreateCodespaceVariables
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWebhooks
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWorkflows
+			viewerCanCreateCodespaceViewerCanCreateCodespaceDeployments
+			viewerCanCreateCodespaceViewerCanCreateCodespaceEnvironments
+			viewerCanCreateCodespaceViewerCanCreateCodespacePackages
+			viewerCanCreateCodespaceViewerCanCreateCodespacePages
+			viewerCanCreateCodespaceViewerCanCreateCodespaceReleases
+			viewerCanCreateCodespaceViewerCanCreateCodespaceTeams
+			viewerCanCreateCodespaceViewerCanCreateCodespaceRepositories
+			viewerCanCreateCodespaceViewerCanCreateCodespacePullRequests
+			viewerCanCreateCodespaceViewerCanCreateCodespaceIssues
+			viewerCanCreateCodespaceViewerCanCreateCodespaceDiscussions
+			viewerCanCreateCodespaceViewerCanCreateCodespaceProjects
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWiki
+			viewerCanCreateCodespaceViewerCanCreateCodespaceTemplates
+			viewerCanCreateCodespaceViewerCanCreateCodespaceForks
+			viewerCanCreateCodespaceViewerCanCreateCodespaceStargazers
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWatchers
+			viewerCanCreateCodespaceViewerCanCreateCodespaceIssuesEnabled
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWikiEnabled
+			viewerCanCreateCodespaceViewerCanCreateCodespaceProjectsEnabled
+			viewerCanCreateCodespaceViewerCanCreateCodespaceDiscussionsEnabled
+			viewerCanCreateCodespaceViewerCanCreateCodespaceMergeCommitAllowed
+			viewerCanCreateCodespaceViewerCanCreateCodespaceSquashMergeAllowed
+			viewerCanCreateCodespaceViewerCanCreateCodespaceRebaseMergeAllowed
+			viewerCanCreateCodespaceViewerCanCreateCodespaceAutoMergeAllowed
+			viewerCanCreateCodespaceViewerCanCreateCodespaceForkCount
+			viewerCanCreateCodespaceViewerCanCreateCodespaceStargazerCount
+			viewerCanCreateCodespaceViewerCanCreateCodespaceWatcherCount
+			viewerCanCreateCodespaceViewerCanCreateCodespaceIssueCount
+			viewerCanCreateCodespaceViewerCanCreateCodespacePullRequestCount
+			viewerCanCreateCodespaceViewerCanCreateCodespacePrimaryLanguage
+			viewerCanCreateCodespaceViewerCanCreateCodespaceLicenseInfo
+			viewerCanCreateCodespaceViewerCanCreateCodespaceDefaultBranchRef
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerPermission
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanAdminister
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanPush
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanTriage
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateProjects
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateDiscussions
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateIssues
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreatePullRequests
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateRepositories
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateTeams
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateGists
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreatePackages
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreatePages
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateReleases
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateDeployments
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateEnvironments
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateSecrets
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateVariables
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateWebhooks
+			viewerCanCreateCodespaceViewerCanCreateCodespaceViewerCanCreateWorkflows
+			viewerCanCreateCodespaceViewerCanCreateCodespaces
+		}
+	}`
+	variables := map[string]interface{}{
+		"owner": owner,
+		"repo":  repo,
+	}
+	err := c.GraphQL(ghinstance.Default(), query, variables, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result.Repository, nil
+}
+
+// GetUser fetches user details using the GitHub API
+func (c Client) GetUser(login string) (*User, error) {
+	var result struct {
+		User *User
+	}
+	query := `
+	query($login: String!) {
+		user(login: $login) {
+			id
+			login
+			name
+			bio
+			company
+			location
+			email
+			websiteUrl
+			createdAt
+			updatedAt
+			followers {
+				totalCount
+			}
+			following {
+				totalCount
+			}
+			repositories {
+				totalCount
+			}
+			gists {
+				totalCount
+			}
+			organizations {
+				totalCount
+			}
+			starredRepositories {
+				totalCount
+			}
+			watching {
+				totalCount
+			}
+			issues {
+				totalCount
+			}
+			pullRequests {
+				totalCount
+			}
+			projects {
+				totalCount
+			}
+			packages {
+				totalCount
+			}
+			securityAdvisories {
+				totalCount
+			}
+			sponsorshipsAsMaintainer {
+				totalCount
+			}
+			sponsorshipsAsSponsor {
+				totalCount
+			}
+			status {
+				emoji
+				message
+			}
+		}
+	}`
+	variables := map[string]interface{}{
+		"login": login,
+	}
+	err := c.GraphQL(ghinstance.Default(), query, variables, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result.User, nil
+}
